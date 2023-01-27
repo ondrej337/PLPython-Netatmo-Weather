@@ -30,7 +30,7 @@ try:
 	
 	
 except Exception as ex:
-  return f"ERROR: {ex}"
+  return ex
 else:
 	return "Rows added"
 $$ LANGUAGE plpython3u;
