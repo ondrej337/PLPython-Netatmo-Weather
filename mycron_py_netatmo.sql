@@ -1,5 +1,5 @@
 CREATE or replace FUNCTION mycron.py_netatmo()
-  RETURNS text
+  RETURNS VOID
 AS $$
 import lnetatmo
 
@@ -10,12 +10,11 @@ try:
   weatherData = lnetatmo.WeatherStationData(authorization)
 	
   # 3 : Access most fresh data directly
-  ir = weatherData.lastData()['Indoor']
-  ot = weatherData.lastData()['Outdoor']
-  am = weatherData.lastData()['Anemometer']
-  rg = weatherData.lastData()['Rain Gauge']
-  
-  # 4 : Inserts to postgres database
+  ir=weatherData.lastData()['Indoor']
+  ot=weatherData.lastData()['Outdoor']
+  am=weatherData.lastData()['Anemometer']
+  rg=weatherData.lastData()['Rain Gauge']
+  # 4 : Insert to postgres database
   ir_plan = plpy.prepare("INSERT INTO netatmo_weather.indoor(time_utc,temperature,co2,humidity,noise,pressure,absolutepressure,min_temp,max_temp,date_max_temp,date_min_temp,temp_trend,pressure_trend) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (time_utc) DO NOTHING",["int","float","int","int","int","float","float","float","float","int","int","VARCHAR","VARCHAR"])
   plpy.execute(ir_plan, [ir['When'], ir['Temperature'], ir['CO2'], ir['Humidity'], ir['Noise'], ir['Pressure'], ir['AbsolutePressure'], ir['min_temp'], ir['max_temp'], ir['date_max_temp'], ir['date_min_temp'], ir['temp_trend'], ir['pressure_trend']])
 	
@@ -28,9 +27,9 @@ try:
   rg_plan = plpy.prepare("INSERT INTO netatmo_weather.rain(time_utc,rain,sum_rain_1,sum_rain_24) VALUES ($1,$2,$3,$4) ON CONFLICT (time_utc) DO NOTHING",["int","float","float","float"])
   plpy.execute(rg_plan, [rg['When'], rg['Rain'], rg['sum_rain_1'], rg['sum_rain_24']])
 	
-	
+
 except Exception as ex:
-  return ex
-else:
-	return "Rows added"
+  plpy.error('ERROR',ex)
+	
 $$ LANGUAGE plpython3u;
+
