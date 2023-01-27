@@ -1,5 +1,5 @@
 # Postgres PLPython-Netatmo-Weather
-Download data from Netatmo weather module/station to postgres database
+Download data from Netatmo weather module/station to Postgress DB using PLPython
 
 ## 1. Instal Python Netatmo-Weather
    https://github.com/philippelt/netatmo-api-python (follow the instruction)
